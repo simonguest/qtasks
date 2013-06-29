@@ -1,120 +1,297 @@
 <!DOCTYPE html>
 <html ng-app="qTasksApp">
 <head>
-    <title>QTasks</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QTasks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="public/js/angular.min.js" type="text/javascript"></script>
-    <script src="public/js/angular-resource.min.js" type="text/javascript"></script>
-    <script src="public/js/underscore-min.js" type="text/javascript"></script>
-    <script src="public/js/jquery.min.js"></script>
-    <script src="public/js/bootstrap.min.js"></script>
+<script src="public/js/angular.min.js" type="text/javascript"></script>
+<script src="public/js/angular-resource.min.js" type="text/javascript"></script>
+<script src="public/js/underscore-min.js" type="text/javascript"></script>
+<script src="public/js/jquery.min.js"></script>
+<script src="public/js/bootstrap.min.js"></script>
 
-    <link href="public/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="public/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+<link href="public/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="public/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
 
-    <style>
-        body {
-            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        }
-    </style>
-    <script>
-        var taskModule = angular.module('taskServices', ['ngResource']).factory('Task', ['$resource', function ($resource) {
-            var Task = $resource('/api/tasks/:taskId', {}, {
+<style>
+    body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+    }
+</style>
+<script>
+
+// setup facebook authorization
+/* facebookConnect.init(function(status){
+ console.log("you should now be logged in: "+status);
+ console.log("FBID: "+facebookConnect.id());
+
+ });
+ */
+
+
+var taskModule = angular.module('taskServices', ['ngResource'])
+        .factory('Task', ['$resource', function ($resource) {
+            var Task = $resource('/api/677830765/tasks/:taskId', {}, {
                 update: { method: 'PUT'}
             });
             return Task;
-        }]);
-
-        var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
+        }])
+        .run(function($rootScope, $location){
+            $rootScope.$on( "$routeChangeStart", function(event, next, current){
+                if (!$rootScope.signedIn)
+                {
+                    if (!(next.templateUrl == "public/templates/login.html"))
+                    {
+                        $location.path("/login");
+                    }
+                }
+            })
         });
 
+var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
+    $routeProvider
+            .when('/login', {templateUrl: 'public/templates/login.html', controller: LoginController})
+            .when('/dashboard', {templateUrl: 'public/templates/dashboard.html', controller: TaskListController})
+            .when('/settings', {templateUrl: 'public/templates/settings.html', controller: SettingsController})
+            .otherwise({redirectTo: '/login'});
 
-        function TaskListController($scope, Task) {
-            $scope.tasks = Task.query(function(){
-                $scope.cachedTasks = angular.copy($scope.tasks);
+});
+
+/*qTasksApp.directive('facebook',function($http)
+ {
+ return{
+ restrict:'A',
+ scope:true,
+ controller:function($scope, $attrs)
+ {
+
+ $scope.fbid = "677830765";
+
+ FB.init({
+ appId      : $attrs.facebook, // App ID
+ channelUrl : '//localhost:3000/channel.html', // Channel File
+ status     : true, // check login status
+ cookie     : true, // enable cookies to allow the server to access the session
+ xfbml      : true  // parse XFBML
+ });
+
+ console.log("init completed");
+
+ FB.login(function(response) {
+ console.log("logging in");
+ if (response.authResponse) {
+ console.log('FB.login connected');
+ fetch();
+ } else {
+ console.log('FB.login cancelled');
+ }
+ }, { scope: 'email,read_stream' }
+ );
+
+ FB.api('/me', function(response){
+ console.log(response.id);
+ });
+
+
+ (function(d){
+ var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+ if (d.getElementById(id)) {return;}
+ js = d.createElement('script'); js.id = id; js.async = true;
+ js.src = "//connect.facebook.net/en_US/all.js";
+ ref.parentNode.insertBefore(js, ref);
+ }(document));
+
+ function login() {
+ FB.login(function(response) {
+ if (response.authResponse) {
+ console.log('FB.login connected');
+ fetch();
+ } else {
+ console.log('FB.login cancelled');
+ }
+ }, { scope: 'email,read_stream' }
+ );
+ };
+
+ function fetch() {
+ $http.post('/facebook/fetch', $scope.auth
+ ).success(function(data) {
+ window.location.reload(true);
+ $scope.fetch_status = data.status;
+ }).error(function(data) {
+ console.log('error: '+data);
+ $scope.fetch_status = data.status;
+ });
+ }
+
+ $scope.fetch = function() {
+ if ($scope.login_status == 'connected') {
+ console.log('fetch');
+ fetch();
+ } else {
+ login();
+ }
+ };
+ },
+ link: function($scope, element, attrs, controller) {
+ // Additional JS functions here
+
+ console.log("this should be loading sync1");
+
+
+
+ /*window.fbAsyncInit = function() {
+ FB.init({
+ appId      : attrs.facebook, // App ID
+ channelUrl : '//localhost:3000/channel.html', // Channel File
+ status     : true, // check login status
+ cookie     : true, // enable cookies to allow the server to access the session
+ xfbml      : true  // parse XFBML
+ });
+
+ // Additional init code here
+ FB.getLoginStatus(function(response) {
+ console.log('getLoginStatus');
+ if (response.status === 'connected') {
+ // connected
+ scope.auth = response.authResponse;
+ FB.api('/me', function(response){
+ scope.fbid = response.id;
+ scope.$apply();
+ console.log(response.id);
+ });
+ } else if (response.status === 'not_authorized') {
+ // not_authorized
+ } else {
+ // not_logged_in
+ }
+ scope.login_status = response.status;
+ scope.$apply();
+ });
+
+
+
+ }; // end of fbAsyncInit
+
+ console.log("this should be loading sync2");
+
+
+ }
+ }
+ });*/
+
+function HeaderController($scope, $rootScope) {
+    $scope.signOut = function () {
+        console.log("signing out!");
+        $rootScope.signedIn = false;
+    }
+
+    $scope.isSignedIn = function () {
+        return $rootScope.signedIn;
+    }
+}
+
+function LoginController($scope, $location, $rootScope) {
+    $scope.login = function () {
+        console.log("logging in!");
+        // validation here
+
+        $location.path('/dashboard');
+        $rootScope.signedIn = true;
+    }
+}
+
+function SettingsController($scope)
+{
+
+}
+
+
+function TaskListController($scope, Task) {
+    $scope.tasks = Task.query(function () {
+        $scope.cachedTasks = angular.copy($scope.tasks);
+    });
+
+    $scope.selectTask = function (id) {
+        console.log("Selected task: " + id);
+        $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
+        $('#taskModal').modal();
+    }
+
+    $scope.saveCurrentTask = function () {
+        console.log("updating cached tasks");
+        $scope.cachedTasks = angular.copy($scope.tasks);
+        console.log("will be saving current task now");
+        if ($scope.selectedTask._id == null) {
+            // new task
+            Task.save({}, $scope.selectedTask, function (data) {
+                $scope.tasks.push(data);
             });
-
-            $scope.selectTask = function (id) {
-                console.log("Selected task: " + id);
-                $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
-                $('#taskModal').modal();
-            }
-
-            $scope.saveCurrentTask = function () {
-                console.log("updating cached tasks");
-                $scope.cachedTasks = angular.copy($scope.tasks);
-                console.log("will be saving current task now");
-                if ($scope.selectedTask._id == null) {
-                    // new task
-                    Task.save({}, $scope.selectedTask, function (data) {
-                        $scope.tasks.push(data);
-                    });
-                }
-                else {
-                    // update existing task
-                    Task.update({taskId: $scope.selectedTask._id}, $scope.selectedTask, function (data) {
-                        console.log("saved");
-                    });
-                }
-            }
-
-            $scope.revertToCachedTasks = function () {
-                console.log("reloading tasks");
-                $scope.tasks = angular.copy($scope.cachedTasks);
-            }
-
-            $scope.newTask = function () {
-                $scope.selectedTask = new Task();
-                $scope.selectedTask.thisweek = false;  // default values
-                $('#taskModal').modal();
-            }
-
-            $scope.completeTask = function (id) {
-                console.log("completing task " + id);
-                Task.delete({taskId: id}, function () {
-                    $scope.revertToCachedTasks();
-                });
-            }
-
-
-            var uniqueValues = function (key) {
-                return _.chain($scope.tasks).sortBy(key).pluck(key).uniq().without('').value();
-            }
-
-            // Scope for projects
-            $scope.projects = function () {
-                return uniqueValues('project');
-            }
-            $scope.projectFilter = {};
-            $scope.setProjectFilter = function (passedProject) {
-                $scope.projectFilter = {project: passedProject};
-            }
-
-            // Scope for contexts
-            $scope.contexts = function () {
-                return uniqueValues('context');
-            }
-            $scope.contextFilter = {};
-            $scope.setContextFilter = function (passedContext) {
-                $scope.contextFilter = {context: passedContext};
-            }
-
-            // Scope for thisweek flag
-            $scope.thisweeks = function () {
-                return uniqueValues('thisweek');
-            }
-            $scope.thisweekFilter = {};
-            $scope.setThisweekFilter = function (passedThisweek) {
-                $scope.thisweekFilter = {thisweek: passedThisweek};
-            }
         }
+        else {
+            // update existing task
+            Task.update({taskId: $scope.selectedTask._id}, $scope.selectedTask, function (data) {
+                console.log("saved");
+            });
+        }
+    }
 
-    </script>
+    $scope.revertToCachedTasks = function () {
+        console.log("reloading tasks");
+        $scope.tasks = angular.copy($scope.cachedTasks);
+    }
+
+    $scope.newTask = function () {
+        $scope.selectedTask = new Task();
+        $scope.selectedTask.thisweek = false;  // default values
+        $('#taskModal').modal();
+    }
+
+    $scope.completeTask = function (id) {
+        console.log("completing task " + id);
+        Task.delete({taskId: id}, function () {
+            $scope.revertToCachedTasks();
+        });
+    }
+
+
+    var uniqueValues = function (key) {
+        return _.chain($scope.tasks).sortBy(key).pluck(key).uniq().without('').value();
+    }
+
+    // Scope for projects
+    $scope.projects = function () {
+        return uniqueValues('project');
+    }
+    $scope.projectFilter = {};
+    $scope.setProjectFilter = function (passedProject) {
+        $scope.projectFilter = {project: passedProject};
+    }
+
+    // Scope for contexts
+    $scope.contexts = function () {
+        return uniqueValues('context');
+    }
+    $scope.contextFilter = {};
+    $scope.setContextFilter = function (passedContext) {
+        $scope.contextFilter = {context: passedContext};
+    }
+
+    // Scope for thisweek flag
+    $scope.thisweeks = function () {
+        return uniqueValues('thisweek');
+    }
+    $scope.thisweekFilter = {};
+    $scope.setThisweekFilter = function (passedThisweek) {
+        $scope.thisweekFilter = {thisweek: passedThisweek};
+    }
+}
+
+</script>
 </head>
 <body>
 
-<div class="container" ng-controller="TaskListController">
+<div class="container" ng-controller="HeaderController">
 
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="navbar-inner">
@@ -128,148 +305,21 @@
 
                 <div class="nav-collapse collapse">
                     <ul class="nav">
-                        <li class="active"><a href="#">Tasks</a></li>
-                        <li><a href="#settings">Settings</a></li>
+                        <li class="active"><a href="#/dashboard">Dashboard</a></li>
+                        <li><a href="#/settings">Settings</a></li>
+                        <li ng-show="isSignedIn()"><a href="#" ng-click="signOut()">Sign Out</a></li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="span2">
-            <ul class="nav nav-pills nav-stacked">
-                <li>Projects</li>
-                <li class="active"><a data-toggle="tab" href="#" ng-click="setProjectFilter('')">All</a></li>
-                <li ng-repeat="project in projects()"><a data-toggle="tab" href="#"
-                                                         ng-click="setProjectFilter(project)">{{project}}</a></li>
-            </ul>
-            <ul class="nav nav-pills nav-stacked">
-                <li>Context</li>
-                <li class="active"><a data-toggle="tab" href="#" ng-click="setContextFilter('')">All</a></li>
-                <li ng-repeat="context in contexts()"><a data-toggle="tab" href="#"
-                                                         ng-click="setContextFilter(context)">{{context}}</a></li>
-            </ul>
-            <ul class="nav nav-pills nav-stacked">
-                <li>This week</li>
-                <li class="active"><a data-toggle="tab" href="#" ng-click="setThisweekFilter('')">All</a></li>
-                <li ng-repeat="thisweek in thisweeks()"><a data-toggle="tab" href="#"
-                                                           ng-click="setThisweekFilter(thisweek)">{{thisweek}}</a></li>
-            </ul>
-        </div>
-        <div class="span10">
 
-            <div id="header">
-                <div class="row">
-                    <div class="span8">
-                        <input type="text" placeholder="Search Tasks" ng-model="searchText">
-                    </div>
-                    <div class="span2 text-right">
-                        <button class="btn btn-primary" ng-click="newTask()">Create New Task</button>
-                    </div>
-                </div>
-                <table class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Body</th>
-                        <th>Project</th>
-                        <th>Context</th>
-                        <th>@tw?</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="task in tasks | orderBy:'description':false | filter:projectFilter | filter:contextFilter | filter:thisweekFilter | filter:searchText">
-                        <td ng-click="selectTask(task._id)">
-                            {{task.description}}
-                        </td>
-                        <td ng-click="selectTask(task._id)">
-                            {{task.body}}
-                        </td>
-                        <td ng-click="selectTask(task._id)">
-                            {{task.project}}
-                        </td>
-                        <td ng-click="selectTask(task._id)">
-                            {{task.context}}
-                        </td>
-                        <td ng-click="selectTask(task._id)">
-                            {{task.thisweek}}
-                        </td>
-                        <td>
-                            <button class="btn btn-success btn-mini" ng-click="completeTask(task._id)"><i
-                                    class="icon-white icon-ok"></i></button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+</div>
 
-        </div>
-    </div>
-    <!-- Task Details Modal -->
-    <div id="taskModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-         aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel">{{selectedTask.description}}</h3>
-        </div>
-        <div class="modal-body">
-            <form class="form-horizontal">
-                <div class="control-group">
-                    <label class="control-label" for="inputDescription">Description</label>
 
-                    <div class="controls">
-                        <input type="text" id="inputDescription" placeholder="Description"
-                               ng-model="selectedTask.description"
-                               value="{{selectedTask.description}}">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="inputBody">Body</label>
-
-                    <div class="controls">
-                        <input type="text" id="inputBody" placeholder="Body"
-                               ng-model="selectedTask.body"
-                               value="{{selectedTask.body}}">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="inputProject">Project</label>
-
-                    <div class="controls">
-                        <input type="text" id="inputProject" placeholder="Project"
-                               ng-model="selectedTask.project"
-                               value="{{selectedTask.project}}"
-                               data-provide="typeahead"
-                               data-source='{{projects()}}'>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="inputContext">Context</label>
-
-                    <div class="controls">
-                        <input type="text" id="inputContext" placeholder="Context"
-                               ng-model="selectedTask.context"
-                               value="{{selectedTask.context}}"
-                               data-provide="typeahead"
-                               data-source='{{contexts()}}'>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="controls">
-                        <label class="checkbox">
-                            <input type="checkbox" ng-checked="selectedTask.thisweek"
-                                   ng-model="selectedTask.thisweek">Due
-                            this week?</label>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="revertToCachedTasks()">Close</button>
-            <button class="btn btn-primary" data-dismiss="modal" ng-click="saveCurrentTask()">Save changes</button>
-        </div>
-    </div>
+<div class="container">
+    <ng-view></ng-view>
 </div>
 
 </body>

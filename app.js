@@ -5,11 +5,8 @@ var express = require('express')
 
 var db = mongoose.createConnection('localhost', 'qtasks');
 
-var taskSchema = mongoose.Schema({description:'String', body:'String', project:'String', context:'String', thisweek:'Bool'});
+var taskSchema = mongoose.Schema({description:'String', body:'String', project:'String', context:'String', thisweek:'Bool', fbid:'String'});
 var taskModel = db.model('Task', taskSchema);
-
-//var registrationSchema = mongoose.Schema({firstname:'String', regdate:'String'});
-//var registrationModel = db.model('Registration', registrationSchema);
 
 var app = express();
 
@@ -37,8 +34,8 @@ app.get('/', function(req,res){
 });
 
 /* list tasks */
-app.get('/api/tasks', function (req, res) {
-    return taskModel.find(function (err, tasks) {
+app.get('/api/:fbid/tasks', function (req, res) {
+    return taskModel.find({"fbid":req.params.fbid}, function (err, tasks) {
         if (!err) {
             return res.send(tasks);
         }

@@ -1,0 +1,134 @@
+<div class="row">
+    <div class="span2">
+        <ul class="nav nav-pills nav-stacked">
+            <li>Projects</li>
+            <li class="active"><a data-toggle="tab" href="#" ng-click="setProjectFilter('')">All</a></li>
+            <li ng-repeat="project in projects()"><a data-toggle="tab" href="#"
+                                                     ng-click="setProjectFilter(project)">{{project}}</a></li>
+        </ul>
+        <ul class="nav nav-pills nav-stacked">
+            <li>Context</li>
+            <li class="active"><a data-toggle="tab" href="#" ng-click="setContextFilter('')">All</a></li>
+            <li ng-repeat="context in contexts()"><a data-toggle="tab" href="#"
+                                                     ng-click="setContextFilter(context)">{{context}}</a></li>
+        </ul>
+        <ul class="nav nav-pills nav-stacked">
+            <li>This week</li>
+            <li class="active"><a data-toggle="tab" href="#" ng-click="setThisweekFilter('')">All</a></li>
+            <li ng-repeat="thisweek in thisweeks()"><a data-toggle="tab" href="#"
+                                                       ng-click="setThisweekFilter(thisweek)">{{thisweek}}</a></li>
+        </ul>
+    </div>
+    <div class="span10">
+
+        <div id="header">
+            <div class="row">
+                <div class="span8">
+                    <input type="text" placeholder="Search Tasks" ng-model="searchText">
+                </div>
+                <div class="span2 text-right">
+                    <button class="btn btn-primary" ng-click="newTask()">Create New Task</button>
+                </div>
+            </div>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Body</th>
+                    <th>Project</th>
+                    <th>Context</th>
+                    <th>@tw?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="task in tasks | orderBy:'description':false | filter:projectFilter | filter:contextFilter | filter:thisweekFilter | filter:searchText">
+                    <td ng-click="selectTask(task._id)">
+                        {{task.description}}
+                    </td>
+                    <td ng-click="selectTask(task._id)">
+                        {{task.body}}
+                    </td>
+                    <td ng-click="selectTask(task._id)">
+                        {{task.project}}
+                    </td>
+                    <td ng-click="selectTask(task._id)">
+                        {{task.context}}
+                    </td>
+                    <td ng-click="selectTask(task._id)">
+                        {{task.thisweek}}
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-mini" ng-click="completeTask(task._id)"><i
+                                class="icon-white icon-ok"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<!-- Task Details Modal -->
+<div id="taskModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">{{selectedTask.description}}</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="inputDescription">Description</label>
+
+                <div class="controls">
+                    <input type="text" id="inputDescription" placeholder="Description"
+                           ng-model="selectedTask.description"
+                           value="{{selectedTask.description}}">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="inputBody">Body</label>
+
+                <div class="controls">
+                    <input type="text" id="inputBody" placeholder="Body"
+                           ng-model="selectedTask.body"
+                           value="{{selectedTask.body}}">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="inputProject">Project</label>
+
+                <div class="controls">
+                    <input type="text" id="inputProject" placeholder="Project"
+                           ng-model="selectedTask.project"
+                           value="{{selectedTask.project}}"
+                           data-provide="typeahead"
+                           data-source='{{projects()}}'>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="inputContext">Context</label>
+
+                <div class="controls">
+                    <input type="text" id="inputContext" placeholder="Context"
+                           ng-model="selectedTask.context"
+                           value="{{selectedTask.context}}"
+                           data-provide="typeahead"
+                           data-source='{{contexts()}}'>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-checked="selectedTask.thisweek"
+                               ng-model="selectedTask.thisweek">Due
+                        this week?</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="revertToCachedTasks()">Close</button>
+        <button class="btn btn-primary" data-dismiss="modal" ng-click="saveCurrentTask()">Save changes</button>
+    </div>
+</div>
