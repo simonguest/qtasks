@@ -6,21 +6,11 @@ var facebookConnect = {
                 channelUrl: 'http://localhost:3000/channel.html', // Channel File for x-domain communication
                 status: true, // check the login status upon init?
                 cookie: true, // set sessions cookies to allow your server to access the session?
-                xfbml: true  // parse XFBML tags on this page?
+                xfbml: true,  // parse XFBML tags on this page?
+                oauth:true
             });
 
             FB.getLoginStatus(function (response) {
-                if (response.status === 'connected') {
-                    console.log('You are connected to the FB connect service');
-                    $('#testapi-button').removeAttr("disabled");
-
-                } else if (response.status === 'not_authorized') {
-                    console.log('You are not authorized');
-                    $('#testapi-button').attr("disabled", "disabled");
-                } else {
-                    console.log('You are not logged in');
-                    $('#testapi-button').attr("disabled", "disabled");
-                }
                 callback(response.status);
             });
         },
@@ -32,16 +22,37 @@ var facebookConnect = {
 
         },
 
-        login: function() {
-            FB.login(function (response) {
-                if (response.authResponse) {
-                    console.log("You are connected!");
-                    this.getLoginStatus();
-                } else {
-                    console.log("User canceled");
+        getUsername: function(callback)
+        {
+            FB.api('/me', function (response) {
+                callback(response.name);
+            });
+        },
+
+        getOAuth: function(callback)
+        {
+            FB.getLoginStatus(function (response) {
+                if (response.status === 'connected') {
+                    callback(response.authResponse.accessToken);
+                }
+                else
+                {
+                    callback("not connected");
                 }
             });
         },
+
+//
+//        getOAuth: function(callback) {
+//            FB.login(function (response) {
+//                if (response.session) {
+//                    console.log("Getting oauth token");
+//                    callback(response.session.access_token);
+//                } else {
+//                    console.log("User canceled");
+//                }
+//            });
+//        },
 
         testAPI: function() {
             console.log('Welcome!  Fetching your information.... ');
