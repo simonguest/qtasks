@@ -40,8 +40,6 @@
                 }])
                 .run(function ($rootScope, $location) {
                     $rootScope.$on("$routeChangeStart", function (event, next, current) {
-                        console.log("on route change start");
-                        console.log($rootScope.oauthToken);
                         if ($rootScope.oauthToken == null) {
                             if (!(next.templateUrl == SIGNIN_TEMPLATE)) {
                                 $location.path(SIGNIN_PATH);
@@ -239,18 +237,18 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="brand" href="#">QTasks</a>
+                <a class="brand" href="#/dashboard">QTasks</a>
 
                 <div class="nav-collapse collapse">
                     <ul class="nav">
                         <li class="active"><a href="#/dashboard">Dashboard</a></li>
                         <li><a href="#/settings">Settings</a></li>
                         <li class="dropdown" ng-show="isSignedIn()">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" ng-model="rootScope">{{name}}<b
+                            <a class="dropdown-toggle" data-toggle="dropdown" ng-model="rootScope">{{name}}<b
                                     class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="#" ng-click="signOut()">Sign Out</a></li>
+                                <li><a ng-click="signOut()">Sign Out</a></li>
                             </ul>
                         </li>
                     </ul>
