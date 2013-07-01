@@ -4,8 +4,10 @@
     <title>QTasks</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="public/js/angular.min.js" type="text/javascript"></script>
-    <script src="public/js/angular-resource.min.js" type="text/javascript"></script>
+    <!--<script src="public/js/angular.min.js" type="text/javascript"></script>-->
+    <!--<script src="public/js/angular-resource.min.js" type="text/javascript"></script>-->
+    <script src="http://code.angularjs.org/1.1.5/angular.min.js"></script>
+    <script src="http://code.angularjs.org/1.1.5/angular-resource.min.js"></script>
     <script src="public/js/underscore-min.js" type="text/javascript"></script>
     <script src="public/js/jquery.min.js"></script>
     <script src="public/js/bootstrap.min.js"></script>
@@ -29,9 +31,10 @@
         var SETTINGS_PATH = "/settings";
 
         var taskModule = angular.module('taskServices', ['ngResource'])
-                .factory('Task', ['$resource', function ($resource) {
+                .factory('Task', ['$resource', '$rootScope', function ($resource, $rootScope) {
                     var Task = $resource('/api/677830765/tasks/:taskId', {}, {
-                        update: { method: 'PUT'}
+                        query: { method: 'GET', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
+                        update: { method: 'PUT', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}}
                     });
                     return Task;
                 }])

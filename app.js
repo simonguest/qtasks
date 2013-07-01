@@ -35,6 +35,7 @@ app.get('/', function(req,res){
 
 /* list tasks */
 app.get('/api/:fbid/tasks', function (req, res) {
+    console.log(req.headers['authorization']);
     return taskModel.find({"fbid":req.params.fbid}, function (err, tasks) {
         if (!err) {
             return res.send(tasks);
