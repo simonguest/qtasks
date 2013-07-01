@@ -2,20 +2,20 @@
     <div class="span2">
         <ul class="nav nav-pills nav-stacked">
             <li>Projects</li>
-            <li class="active"><a data-toggle="tab" href="#" ng-click="setProjectFilter('')">All</a></li>
-            <li ng-repeat="project in projects()"><a data-toggle="tab" href="#"
+            <li class="active"><a data-toggle="tab" ng-click="setProjectFilter('')">All</a></li>
+            <li ng-repeat="project in projects()"><a data-toggle="tab"
                                                      ng-click="setProjectFilter(project)">{{project}}</a></li>
         </ul>
         <ul class="nav nav-pills nav-stacked">
             <li>Context</li>
-            <li class="active"><a data-toggle="tab" href="#" ng-click="setContextFilter('')">All</a></li>
-            <li ng-repeat="context in contexts()"><a data-toggle="tab" href="#"
+            <li class="active"><a data-toggle="tab" ng-click="setContextFilter('')">All</a></li>
+            <li ng-repeat="context in contexts()"><a data-toggle="tab"
                                                      ng-click="setContextFilter(context)">{{context}}</a></li>
         </ul>
         <ul class="nav nav-pills nav-stacked">
             <li>This week</li>
-            <li class="active"><a data-toggle="tab" href="#" ng-click="setThisweekFilter('')">All</a></li>
-            <li ng-repeat="thisweek in thisweeks()"><a data-toggle="tab" href="#"
+            <li class="active"><a data-toggle="tab" ng-click="setThisweekFilter('')">All</a></li>
+            <li ng-repeat="thisweek in thisweeks()"><a data-toggle="tab"
                                                        ng-click="setThisweekFilter(thisweek)">{{thisweek}}</a></li>
         </ul>
     </div>

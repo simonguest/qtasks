@@ -40,6 +40,8 @@
                 }])
                 .run(function ($rootScope, $location) {
                     $rootScope.$on("$routeChangeStart", function (event, next, current) {
+                        console.log("on route change start");
+                        console.log($rootScope.oauthToken);
                         if ($rootScope.oauthToken == null) {
                             if (!(next.templateUrl == SIGNIN_TEMPLATE)) {
                                 $location.path(SIGNIN_PATH);
