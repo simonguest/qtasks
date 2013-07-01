@@ -1,7 +1,8 @@
 var express = require('express')
     , http = require('http')
     , path = require('path')
-    , mongoose = require('mongoose');
+    , mongoose = require('mongoose')
+    , request = require('request');
 
 var db = mongoose.createConnection('localhost', 'qtasks');
 
@@ -33,16 +34,24 @@ app.get('/', function(req,res){
     res.sendfile('index.html');
 });
 
+var getFacebookId = function(oAuthToken, callback) {
+    request("https://graph.facebook.com/me?fields=id&access_token="+oAuthToken, function(error, response, body){
+        callback(JSON.parse(body).id);
+    });
+}
+
 /* list tasks */
-app.get('/api/:fbid/tasks', function (req, res) {
-    console.log(req.headers['authorization']);
-    return taskModel.find({"fbid":req.params.fbid}, function (err, tasks) {
-        if (!err) {
-            return res.send(tasks);
-        }
-        else {
-            return console.log(err);
-        }
+app.get('/api/tasks', function (req, res) {
+    var token = req.headers['authorization'].substring(7);
+    getFacebookId(token, function(fbid){
+        return taskModel.find({"fbid":fbid}, function (err, tasks) {
+            if (!err) {
+                return res.send(tasks);
+            }
+            else {
+                return console.log(err);
+            }
+        });
     });
 });
 

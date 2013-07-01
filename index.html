@@ -32,7 +32,7 @@
 
         var taskModule = angular.module('taskServices', ['ngResource'])
                 .factory('Task', ['$resource', '$rootScope', function ($resource, $rootScope) {
-                    var Task = $resource('/api/677830765/tasks/:taskId', {}, {
+                    var Task = $resource('/api/tasks/:taskId', {}, {
                         query: { method: 'GET', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
                         update: { method: 'PUT', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}}
                     });
