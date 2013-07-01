@@ -10,7 +10,6 @@
     <script src="public/js/jquery.min.js"></script>
     <script src="public/js/bootstrap.min.js"></script>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="public/js/facebook-connect.js"></script>
 
     <link href="public/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="public/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
@@ -22,6 +21,13 @@
     </style>
     <script>
 
+        var SIGNIN_TEMPLATE = "public/templates/signin.html";
+        var SIGNIN_PATH = "/signin";
+        var DASHBOARD_TEMPLATE = "public/templates/dashboard.html";
+        var DASHBOARD_PATH = "/dashboard";
+        var SETTINGS_TEMPLATE = "public/templates/settings.html";
+        var SETTINGS_PATH = "/settings";
+
         var taskModule = angular.module('taskServices', ['ngResource'])
                 .factory('Task', ['$resource', function ($resource) {
                     var Task = $resource('/api/677830765/tasks/:taskId', {}, {
@@ -32,8 +38,8 @@
                 .run(function ($rootScope, $location) {
                     $rootScope.$on("$routeChangeStart", function (event, next, current) {
                         if ($rootScope.oauthToken == null) {
-                            if (!(next.templateUrl == "public/templates/signin.html")) {
-                                $location.path("/signin");
+                            if (!(next.templateUrl == SIGNIN_TEMPLATE)) {
+                                $location.path(SIGNIN_PATH);
                             }
                         }
                     })
@@ -41,41 +47,86 @@
 
         var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
             $routeProvider
-                    .when('/signin', {templateUrl: 'public/templates/signin.html', controller: SignInController})
-                    .when('/dashboard', {templateUrl: 'public/templates/dashboard.html', controller: TaskListController})
-                    .when('/settings', {templateUrl: 'public/templates/settings.html', controller: SettingsController})
-                    .otherwise({redirectTo: '/signin'});
+                    .when(SIGNIN_PATH, {templateUrl: SIGNIN_TEMPLATE, controller: FacebookSigninController})
+                    .when(DASHBOARD_PATH, {templateUrl: DASHBOARD_TEMPLATE, controller: DashboardController})
+                    .when(SETTINGS_PATH, {templateUrl: SETTINGS_TEMPLATE, controller: SettingsController})
+                    .otherwise({redirectTo: SIGNIN_PATH});
 
         });
 
-        function SignInController($scope, $location, $rootScope) {
+        function FacebookSigninController($scope, $location, $rootScope) {
 
             $scope.$on('$viewContentLoaded', function () {
                 if ($rootScope.fbInitCalled == null) {
-                    facebookConnect.init(function () {
 
-                        facebookConnect.getUsername(function (name) {
-                            console.log("Name: " + name);
-                            $rootScope.name = name;
-                        });
-
-                        $rootScope.fbInitCalled = true;
-
+                    FB.init({
+                        appId: '530788920290681', // App ID from the App Dashboard
+                        channelUrl: 'http://localhost:3000/channel.html', // Channel File for x-domain communication
+                        status: true, // check the login status upon init?
+                        cookie: true, // set sessions cookies to allow your server to access the session?
+                        xfbml: true,  // parse XFBML tags on this page?
+                        oauth: true
                     });
+
+                    $rootScope.fbInitCalled = true;
                 }
+
+                // auto sign in?
+                FB.getLoginStatus(function (response) {
+                    console.log(response.status);
+                    if (response.status === 'connected') {
+                        $scope.setLoginDetails();
+                    }
+                });
+
             });
 
             $scope.signIn = function () {
-                facebookConnect.getOAuth(function (oauth) {
-                    console.log("OAuth: " + oauth);
-                    $rootScope.oauthToken = oauth;
-                    $location.path('/dashboard');
+
+                FB.getLoginStatus(function (response) {
+                    console.log(response.status);
+                    if (response.status === 'connected') {
+                        $scope.setLoginDetails();
+                    }
+                    else if (response.status == 'not_authorized') {
+                        // set message to say need authorization
+                    }
+                    else {
+                        // do login
+                        FB.login(function(response){
+                            if (response.authResponse)
+                            {
+                                console.log("Logged in.  Fetching your information.");
+                                $scope.setLoginDetails();
+                            }
+                        });
+                    }
+                });
+            }
+
+            $scope.setLoginDetails = function () {
+                FB.getLoginStatus(function (response) {
+                    if (response.status === 'connected') {
+
+                        $rootScope.oauthToken = response.authResponse.accessToken;
+
+                        FB.api('/me', function(response){
+                            $rootScope.name = response.name;
+                            $location.path(DASHBOARD_PATH);
+                            $scope.$apply();
+                        });
+                    }
                 });
             }
 
             $scope.signOut = function () {
                 console.log("signing out!");
-                $rootScope.oauthToken = null;
+
+                FB.logout(function() {
+                    $rootScope.oauthToken = null;
+                    $location.path(SIGNIN_PATH);
+                    $scope.$apply();
+                });
             }
 
             $scope.isSignedIn = function () {
@@ -88,7 +139,7 @@
         }
 
 
-        function TaskListController($scope, Task) {
+        function DashboardController($scope, Task) {
             $scope.tasks = Task.query(function () {
                 $scope.cachedTasks = angular.copy($scope.tasks);
             });
@@ -173,7 +224,7 @@
 <body>
 <div id="fb-root"></div>
 
-<div class="container" ng-controller="SignInController">
+<div class="container" ng-controller="FacebookSigninController">
 
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="navbar-inner">
@@ -190,7 +241,8 @@
                         <li class="active"><a href="#/dashboard">Dashboard</a></li>
                         <li><a href="#/settings">Settings</a></li>
                         <li class="dropdown" ng-show="isSignedIn()">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" ng-model="rootScope">{{name}}<b class="caret"></b>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" ng-model="rootScope">{{name}}<b
+                                    class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a href="#" ng-click="signOut()">Sign Out</a></li>

@@ -1,25 +1,24 @@
 var facebookConnect = {
 
         init:  function(callback) {
-            FB.init({
-                appId: '530788920290681', // App ID from the App Dashboard
-                channelUrl: 'http://localhost:3000/channel.html', // Channel File for x-domain communication
-                status: true, // check the login status upon init?
-                cookie: true, // set sessions cookies to allow your server to access the session?
-                xfbml: true,  // parse XFBML tags on this page?
-                oauth:true
-            });
+
 
             FB.getLoginStatus(function (response) {
-                callback(response.status);
+                callback(response);
             });
         },
 
+        logout: function(callback) {
+            FB.logout(function(response){
+                callback("Logged out");
+            });
+        },
+
+
         getLoginStatus: function(callback) {
-            console.time("getLoginStatus");
-
-            console.timeEnd("getLoginStatus");
-
+            FB.getLoginStatus(function (response) {
+                callback(response);
+            });
         },
 
         getUsername: function(callback)
@@ -31,15 +30,7 @@ var facebookConnect = {
 
         getOAuth: function(callback)
         {
-            FB.getLoginStatus(function (response) {
-                if (response.status === 'connected') {
-                    callback(response.authResponse.accessToken);
-                }
-                else
-                {
-                    callback("not connected");
-                }
-            });
+
         },
 
 //
