@@ -58,7 +58,7 @@
                         {{task.thisweek}}
                     </td>
                     <td>
-                        <button class="btn btn-success btn-mini" ng-click="completeTask(task._id)"><i
+                        <button class="btn btn-success btn-mini" ng-click="showCompleteDialog(task._id)"><i
                                 class="icon-white icon-ok"></i></button>
                     </td>
                 </tr>
@@ -130,5 +130,21 @@
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="revertToCachedTasks()">Close</button>
         <button class="btn btn-primary" data-dismiss="modal" ng-click="saveCurrentTask()">Save changes</button>
+    </div>
+</div>
+<!-- Confirm delete modal -->
+<div id="deleteTaskModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3>Complete <i>{{selectedTask.description}}</i>?</h3>
+    </div>
+    <div class="modal-body">
+        <p>You are about to complete the <i>'{{selectedTask.description}}'</i> task.</p>
+        <p>Do you want to proceed?</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+        <button class="btn btn-primary" data-dismiss="modal" ng-click="completeTask(selectedTask._id)">Yes</button>
     </div>
 </div>

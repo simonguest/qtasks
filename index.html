@@ -191,6 +191,11 @@
                 $('#taskModal').modal();
             }
 
+            $scope.showCompleteDialog = function (id) {
+                $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
+                $('#deleteTaskModal').modal();
+            }
+
             $scope.completeTask = function (id) {
                 console.log("completing task " + id);
                 $scope.tbdTask = _.where($scope.tasks, {_id: id})[0];
