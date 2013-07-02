@@ -35,7 +35,9 @@ app.get('/', function (req, res) {
 });
 
 var getFacebookId = function (oAuthToken, callback) {
+    console.log("token: "+oAuthToken);
     request("https://graph.facebook.com/me?fields=id&access_token=" + oAuthToken, function (error, response, body) {
+        console.log(body);
         callback(JSON.parse(body).id);
     });
 }

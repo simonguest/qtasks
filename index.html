@@ -29,15 +29,6 @@
         var SETTINGS_PATH = "/settings";
 
         var taskModule = angular.module('taskServices', ['ngResource'])
-                .factory('Task', ['$resource', '$rootScope', function ($resource, $rootScope) {
-                    var Task = $resource('/api/tasks/:taskId', {}, {
-                        query: { method: 'GET', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
-                        save: { method: 'POST', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
-                        update: { method: 'PUT', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
-                        delete: {method: 'DELETE', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}}
-                    });
-                    return Task;
-                }])
                 .run(function ($rootScope, $location) {
                     $rootScope.$on("$routeChangeStart", function (event, next, current) {
                         if ($rootScope.oauthToken == null) {
@@ -76,10 +67,11 @@
 
                 // auto sign in?
                 FB.getLoginStatus(function (response) {
-                    console.log(response.status);
+                    console.log("Connection status: "+response.status);
                     if (response.status === 'connected') {
                         $scope.setLoginDetails();
                     }
+                    console.log("OAuth Token: "+$rootScope.oauthToken);
                 });
 
             });
@@ -142,10 +134,20 @@
         }
 
 
-        function DashboardController($scope, Task) {
+        function DashboardController($scope, $resource, $rootScope) {
+
+            var Task = $resource('/api/tasks/:taskId', {}, {
+                query: { method: 'GET', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
+                save: { method: 'POST', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
+                update: { method: 'PUT', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
+                delete: {method: 'DELETE', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}}
+            });
+
             $scope.tasks = Task.query(function () {
                 $scope.cachedTasks = angular.copy($scope.tasks);
             });
+
+
 
             $scope.selectTask = function (id) {
                 console.log("Selected task: " + id);
