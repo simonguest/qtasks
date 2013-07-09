@@ -162,15 +162,16 @@
                 if ($scope.selectedTask._id == null) {
                     // new task
                     Task.save({}, $scope.selectedTask, function (data) {
-                        //$scope.reloadTasks();
                         console.log(data);
                         $scope.tasks.push(data);
+                        $scope.updateCachedTasks();
                     });
                 }
                 else {
                     // update existing task
                     Task.update({taskId: $scope.selectedTask._id}, $scope.selectedTask, function (data) {
                         console.log("saved");
+                        $scope.updateCachedTasks();
                     });
                 }
             }
@@ -178,6 +179,11 @@
             $scope.revertToCachedTasks = function () {
                 console.log("reverting to cached tasks");
                 $scope.tasks = angular.copy($scope.cachedTasks);
+            }
+
+            $scope.updateCachedTasks = function () {
+                console.log("updating cached tasks");
+                $scope.cachedTasks = angular.copy($scope.tasks);
             }
 
             $scope.reloadTasks = function () {
