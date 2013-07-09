@@ -85,7 +85,7 @@
                     <input type="text" id="inputDescription" placeholder="Description"
                            ng-model="selectedTask.description"
                            value="{{selectedTask.description}}"
-                           autofocus >
+                           autofocus>
                 </div>
             </div>
             <div class="control-group">
@@ -104,8 +104,7 @@
                     <input type="text" id="inputProject" placeholder="Project"
                            ng-model="selectedTask.project"
                            value="{{selectedTask.project}}"
-                           data-provide="typeahead"
-                           data-source='{{projects()}}'>
+                           data-provide="typeahead">
                 </div>
             </div>
             <div class="control-group">
@@ -115,8 +114,7 @@
                     <input type="text" id="inputContext" placeholder="Context"
                            ng-model="selectedTask.context"
                            value="{{selectedTask.context}}"
-                           data-provide="typeahead"
-                           data-source='{{contexts()}}'>
+                           data-provide="typeahead">
                 </div>
             </div>
             <div class="control-group">
@@ -129,7 +127,9 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" data-dismiss="modal" ng-click="saveCurrentTask()" value="Submit">Save changes</button>
+            <button class="btn btn-primary" data-dismiss="modal" ng-click="saveCurrentTask()" value="Submit">Save
+                changes
+            </button>
         </div>
     </form>
 </div>

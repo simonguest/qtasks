@@ -199,6 +199,9 @@
                 $('#taskModal').modal().on('shown', function(data)
                 {
                     $(data.target).find("[autofocus]:first").focus();
+                    // dynamically construct the project and context list
+                    $(data.target).find('#inputProject').typeahead().data('typeahead').source = $scope.projects();
+                    $(data.target).find('#inputContext').typeahead().data('typeahead').source = $scope.contexts();
                 });
 
             }
