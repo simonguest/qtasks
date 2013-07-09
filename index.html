@@ -196,7 +196,11 @@
             $scope.newTask = function () {
                 $scope.selectedTask = new Task();
                 $scope.selectedTask.thisweek = false;  // default values
-                $('#taskModal').modal();
+                $('#taskModal').modal().on('shown', function(data)
+                {
+                    $(data.target).find("[autofocus]:first").focus();
+                });
+
             }
 
             $scope.showCompleteDialog = function (id) {
