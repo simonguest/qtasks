@@ -1,259 +1,275 @@
 <!DOCTYPE html>
 <html ng-app="qTasksApp">
 <head>
-    <title>QTasks</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QTasks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="public/js/angular.min.js"></script>
-    <script src="public/js/angular-resource.min.js"></script>
-    <script src="public/js/underscore-min.js" type="text/javascript"></script>
-    <script src="public/js/jquery.min.js"></script>
-    <script src="public/js/bootstrap.min.js"></script>
-    <script src="http://connect.facebook.net/en_US/all.js"></script>
+<script src="public/js/angular.min.js"></script>
+<script src="public/js/angular-resource.min.js"></script>
+<script src="public/js/underscore-min.js" type="text/javascript"></script>
+<script src="public/js/jquery.min.js"></script>
+<script src="public/js/bootstrap.min.js"></script>
+<script src="http://connect.facebook.net/en_US/all.js"></script>
 
-    <link href="public/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="public/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+<link href="public/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="public/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
 
-    <style>
-        body {
-            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        }
-    </style>
-    <script>
+<style>
+    body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+    }
+</style>
+<script>
 
-        var SIGNIN_TEMPLATE = "public/templates/signin.html";
-        var SIGNIN_PATH = "/signin";
-        var DASHBOARD_TEMPLATE = "public/templates/dashboard.html";
-        var DASHBOARD_PATH = "/dashboard";
-        var SETTINGS_TEMPLATE = "public/templates/settings.html";
-        var SETTINGS_PATH = "/settings";
+var SIGNIN_TEMPLATE = "public/templates/signin.html";
+var SIGNIN_PATH = "/signin";
+var DASHBOARD_TEMPLATE = "public/templates/dashboard.html";
+var DASHBOARD_PATH = "/dashboard";
+var SETTINGS_TEMPLATE = "public/templates/settings.html";
+var SETTINGS_PATH = "/settings";
 
-        var taskModule = angular.module('taskServices', ['ngResource'])
-                .run(function ($rootScope, $location) {
-                    $rootScope.$on("$routeChangeStart", function (event, next, current) {
-                        if ($rootScope.oauthToken == null) {
-                            if (!(next.templateUrl == SIGNIN_TEMPLATE)) {
-                                $location.path(SIGNIN_PATH);
-                            }
-                        }
-                    })
-                });
-
-        var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
-            $routeProvider
-                    .when(SIGNIN_PATH, {templateUrl: SIGNIN_TEMPLATE, controller: FacebookSigninController})
-                    .when(DASHBOARD_PATH, {templateUrl: DASHBOARD_TEMPLATE, controller: DashboardController})
-                    .when(SETTINGS_PATH, {templateUrl: SETTINGS_TEMPLATE, controller: SettingsController})
-                    .otherwise({redirectTo: SIGNIN_PATH});
-
+var taskModule = angular.module('taskServices', ['ngResource'])
+        .run(function ($rootScope, $location) {
+            $rootScope.$on("$routeChangeStart", function (event, next, current) {
+                if ($rootScope.oauthToken == null) {
+                    if (!(next.templateUrl == SIGNIN_TEMPLATE)) {
+                        $location.path(SIGNIN_PATH);
+                    }
+                }
+            })
         });
 
-        function FacebookSigninController($scope, $location, $rootScope) {
+var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
+    $routeProvider
+            .when(SIGNIN_PATH, {templateUrl: SIGNIN_TEMPLATE, controller: FacebookSigninController})
+            .when(DASHBOARD_PATH, {templateUrl: DASHBOARD_TEMPLATE, controller: DashboardController})
+            .when(SETTINGS_PATH, {templateUrl: SETTINGS_TEMPLATE, controller: SettingsController})
+            .otherwise({redirectTo: SIGNIN_PATH});
 
-            $scope.$on('$viewContentLoaded', function () {
-                if ($rootScope.fbInitCalled == null) {
+});
 
-                    FB.init({
-                        appId: '530788920290681', // App ID from the App Dashboard
-                        channelUrl: 'http://localhost:3000/channel.html', // Channel File for x-domain communication
-                        status: true, // check the login status upon init?
-                        cookie: true, // set sessions cookies to allow your server to access the session?
-                        xfbml: true,  // parse XFBML tags on this page?
-                        oauth: true
-                    });
+function FacebookSigninController($scope, $location, $rootScope) {
 
-                    $rootScope.fbInitCalled = true;
-                }
+    $scope.$on('$viewContentLoaded', function () {
+        if ($rootScope.fbInitCalled == null) {
 
-                // auto sign in?
-                FB.getLoginStatus(function (response) {
-                    console.log("Connection status: "+response.status);
-                    if (response.status === 'connected') {
-                        $scope.setLoginDetails();
-                    }
-                    console.log("OAuth Token: "+$rootScope.oauthToken);
-                });
-
+            FB.init({
+                appId: '530788920290681', // App ID from the App Dashboard
+                channelUrl: 'http://localhost:3000/channel.html', // Channel File for x-domain communication
+                status: true, // check the login status upon init?
+                cookie: true, // set sessions cookies to allow your server to access the session?
+                xfbml: true,  // parse XFBML tags on this page?
+                oauth: true
             });
 
-            $scope.signIn = function () {
+            $rootScope.fbInitCalled = true;
+        }
 
-                FB.getLoginStatus(function (response) {
-                    console.log(response.status);
-                    if (response.status === 'connected') {
+        // auto sign in?
+        FB.getLoginStatus(function (response) {
+            console.log("Connection status: " + response.status);
+            if (response.status === 'connected') {
+                $scope.setLoginDetails();
+            }
+            console.log("OAuth Token: " + $rootScope.oauthToken);
+        });
+
+    });
+
+    $scope.signIn = function () {
+
+        FB.getLoginStatus(function (response) {
+            console.log(response.status);
+            if (response.status === 'connected') {
+                $scope.setLoginDetails();
+            }
+            else if (response.status == 'not_authorized') {
+                // set message to say need authorization
+            }
+            else {
+                // do login
+                FB.login(function (response) {
+                    if (response.authResponse) {
+                        console.log("Logged in.  Fetching your information.");
                         $scope.setLoginDetails();
                     }
-                    else if (response.status == 'not_authorized') {
-                        // set message to say need authorization
-                    }
-                    else {
-                        // do login
-                        FB.login(function(response){
-                            if (response.authResponse)
-                            {
-                                console.log("Logged in.  Fetching your information.");
-                                $scope.setLoginDetails();
-                            }
-                        });
-                    }
                 });
             }
+        });
+    }
 
-            $scope.setLoginDetails = function () {
-                FB.getLoginStatus(function (response) {
-                    if (response.status === 'connected') {
+    $scope.setLoginDetails = function () {
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
 
-                        $rootScope.oauthToken = response.authResponse.accessToken;
+                $rootScope.oauthToken = response.authResponse.accessToken;
 
-                        FB.api('/me', function(response){
-                            $rootScope.name = response.name;
-                            $location.path(DASHBOARD_PATH);
-                            $scope.$apply();
-                        });
-                    }
-                });
-            }
-
-            $scope.signOut = function () {
-                console.log("signing out!");
-
-                FB.logout(function() {
-                    $rootScope.oauthToken = null;
-                    $location.path(SIGNIN_PATH);
+                FB.api('/me', function (response) {
+                    $rootScope.name = response.name;
+                    $location.path(DASHBOARD_PATH);
                     $scope.$apply();
                 });
             }
+        });
+    }
 
-            $scope.isSignedIn = function () {
-                return $rootScope.oauthToken != null;
-            }
-        }
+    $scope.signOut = function () {
+        console.log("signing out!");
 
-        function SettingsController($scope) {
+        FB.logout(function () {
+            $rootScope.oauthToken = null;
+            $location.path(SIGNIN_PATH);
+            $scope.$apply();
+        });
+    }
 
-        }
+    $scope.isSignedIn = function () {
+        return $rootScope.oauthToken != null;
+    }
+}
 
+function SettingsController($scope) {
 
-        function DashboardController($scope, $resource, $rootScope) {
-
-            var Task = $resource('/api/tasks/:taskId', {}, {
-                query: { method: 'GET', params: {}, isArray:true, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
-                save: { method: 'POST', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
-                update: { method: 'PUT', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}},
-                delete: {method: 'DELETE', params: {}, isArray:false, headers: {Authorization:'Bearer '+$rootScope.oauthToken}}
-            });
-
-            $scope.tasks = Task.query(function () {
-                $scope.cachedTasks = angular.copy($scope.tasks);
-            });
+}
 
 
+function DashboardController($scope, $resource, $rootScope) {
 
-            $scope.selectTask = function (id) {
-                console.log("Selected task: " + id);
-                $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
-                $('#taskModal').modal();
-            }
+    var Task = $resource('/api/tasks/:taskId', {}, {
+        query: { method: 'GET', params: {}, isArray: true, headers: {Authorization: 'Bearer ' + $rootScope.oauthToken}},
+        save: { method: 'POST', params: {}, isArray: false, headers: {Authorization: 'Bearer ' + $rootScope.oauthToken}},
+        update: { method: 'PUT', params: {}, isArray: false, headers: {Authorization: 'Bearer ' + $rootScope.oauthToken}},
+        delete: {method: 'DELETE', params: {}, isArray: false, headers: {Authorization: 'Bearer ' + $rootScope.oauthToken}}
+    });
 
-            $scope.saveCurrentTask = function () {
-                console.log("updating cached tasks");
-                $scope.cachedTasks = angular.copy($scope.tasks);
-                console.log("will be saving current task now");
-                if ($scope.selectedTask._id == null) {
-                    // new task
-                    Task.save({}, $scope.selectedTask, function (data) {
-                        console.log(data);
-                        $scope.tasks.push(data);
-                        $scope.updateCachedTasks();
+    $scope.tasks = Task.query(function (success) {
+        $scope.cachedTasks = angular.copy($scope.tasks);
+    }, function (error) {
+        if (error.status == 401)
+        {
+            // need to re-obtain a token
+            FB.getLoginStatus(function (response) {
+                if (response.status === 'connected') {
+                    $rootScope.oauthToken = response.authResponse.accessToken;
+                    console.log("obtained new token");
+                    $scope.tasks = Task.query(function()
+                    {
+                        $scope.cachedTasks = angular.copy($scope.tasks);
+                    },
+                    function()
+                    {
+                        console.log("have to give up!");
                     });
                 }
-                else {
-                    // update existing task
-                    Task.update({taskId: $scope.selectedTask._id}, $scope.selectedTask, function (data) {
-                        console.log("saved");
-                        $scope.updateCachedTasks();
-                    });
-                }
-            }
-
-            $scope.revertToCachedTasks = function () {
-                console.log("reverting to cached tasks");
-                $scope.tasks = angular.copy($scope.cachedTasks);
-            }
-
-            $scope.updateCachedTasks = function () {
-                console.log("updating cached tasks");
-                $scope.cachedTasks = angular.copy($scope.tasks);
-            }
-
-            $scope.reloadTasks = function () {
-                console.log("reloading tasks");
-                $scope.tasks = Task.query(function () {
-                    $scope.cachedTasks = angular.copy($scope.tasks);
-                });
-            }
-
-            $scope.newTask = function () {
-                $scope.selectedTask = new Task();
-                $scope.selectedTask.thisweek = false;  // default values
-                $('#taskModal').modal().on('shown', function(data)
-                {
-                    $(data.target).find("[autofocus]:first").focus();
-                    // dynamically construct the project and context list
-                    $(data.target).find('#inputProject').typeahead().data('typeahead').source = $scope.projects();
-                    $(data.target).find('#inputContext').typeahead().data('typeahead').source = $scope.contexts();
-                });
-
-            }
-
-            $scope.showCompleteDialog = function (id) {
-                $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
-                $('#deleteTaskModal').modal();
-            }
-
-            $scope.completeTask = function (id) {
-                console.log("completing task " + id);
-                $scope.tbdTask = _.where($scope.tasks, {_id: id})[0];
-
-                Task.delete({taskId: id}, function () {
-                    $scope.tasks = _.without($scope.tasks, $scope.tbdTask);
-                });
-            }
-
-
-            var uniqueValues = function (key) {
-                return _.chain($scope.tasks).sortBy(key).pluck(key).uniq().without('').value();
-            }
-
-            // Scope for projects
-            $scope.projects = function () {
-                return uniqueValues('project');
-            }
-            $scope.projectFilter = {};
-            $scope.setProjectFilter = function (passedProject) {
-                $scope.projectFilter = {project: passedProject};
-            }
-
-            // Scope for contexts
-            $scope.contexts = function () {
-                return uniqueValues('context');
-            }
-            $scope.contextFilter = {};
-            $scope.setContextFilter = function (passedContext) {
-                $scope.contextFilter = {context: passedContext};
-            }
-
-            // Scope for thisweek flag
-            $scope.thisweeks = function () {
-                return uniqueValues('thisweek');
-            }
-            $scope.thisweekFilter = {};
-            $scope.setThisweekFilter = function (passedThisweek) {
-                $scope.thisweekFilter = {thisweek: passedThisweek};
-            }
+            });
         }
+    });
 
-    </script>
+
+    $scope.selectTask = function (id) {
+        console.log("Selected task: " + id);
+        $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
+        $('#taskModal').modal();
+    }
+
+    $scope.saveCurrentTask = function () {
+        console.log("updating cached tasks");
+        $scope.cachedTasks = angular.copy($scope.tasks);
+        console.log("will be saving current task now");
+        if ($scope.selectedTask._id == null) {
+            // new task
+            Task.save({}, $scope.selectedTask, function (data) {
+                console.log(data);
+                $scope.tasks.push(data);
+                $scope.updateCachedTasks();
+            });
+        }
+        else {
+            // update existing task
+            Task.update({taskId: $scope.selectedTask._id}, $scope.selectedTask, function (data) {
+                console.log("saved");
+                $scope.updateCachedTasks();
+            });
+        }
+    }
+
+    $scope.revertToCachedTasks = function () {
+        console.log("reverting to cached tasks");
+        $scope.tasks = angular.copy($scope.cachedTasks);
+    }
+
+    $scope.updateCachedTasks = function () {
+        console.log("updating cached tasks");
+        $scope.cachedTasks = angular.copy($scope.tasks);
+    }
+
+    $scope.reloadTasks = function () {
+        console.log("reloading tasks");
+        $scope.tasks = Task.query(function () {
+            $scope.cachedTasks = angular.copy($scope.tasks);
+        });
+    }
+
+    $scope.newTask = function () {
+        $scope.selectedTask = new Task();
+        $scope.selectedTask.thisweek = false;  // default values
+        $('#taskModal').modal().on('shown', function (data) {
+            $(data.target).find("[autofocus]:first").focus();
+            // dynamically construct the project and context list
+            $(data.target).find('#inputProject').typeahead().data('typeahead').source = $scope.projects();
+            $(data.target).find('#inputContext').typeahead().data('typeahead').source = $scope.contexts();
+        });
+
+    }
+
+    $scope.showCompleteDialog = function (id) {
+        $scope.selectedTask = _.where($scope.tasks, {_id: id})[0];
+        $('#deleteTaskModal').modal();
+    }
+
+    $scope.completeTask = function (id) {
+        console.log("completing task " + id);
+        $scope.tbdTask = _.where($scope.tasks, {_id: id})[0];
+
+        Task.delete({taskId: id}, function () {
+            $scope.tasks = _.without($scope.tasks, $scope.tbdTask);
+        });
+    }
+
+
+    var uniqueValues = function (key) {
+        return _.chain($scope.tasks).sortBy(key).pluck(key).uniq().without('').value();
+    }
+
+    // Scope for projects
+    $scope.projects = function () {
+        return uniqueValues('project');
+    }
+    $scope.projectFilter = {};
+    $scope.setProjectFilter = function (passedProject) {
+        $scope.projectFilter = {project: passedProject};
+    }
+
+    // Scope for contexts
+    $scope.contexts = function () {
+        return uniqueValues('context');
+    }
+    $scope.contextFilter = {};
+    $scope.setContextFilter = function (passedContext) {
+        $scope.contextFilter = {context: passedContext};
+    }
+
+    // Scope for thisweek flag
+    $scope.thisweeks = function () {
+        return uniqueValues('thisweek');
+    }
+    $scope.thisweekFilter = {};
+    $scope.setThisweekFilter = function (passedThisweek) {
+        $scope.thisweekFilter = {thisweek: passedThisweek};
+    }
+}
+
+</script>
 </head>
 <body>
 <div id="fb-root"></div>

@@ -37,14 +37,25 @@ app.get('/', function (req, res) {
 var getFacebookId = function (oAuthToken, callback) {
     console.log("token: "+oAuthToken);
     request("https://graph.facebook.com/me?fields=id&access_token=" + oAuthToken, function (error, response, body) {
-        console.log(body);
-        callback(JSON.parse(body).id);
+
+        //var result = '{"error":{"message":"Error validating access token: Session has expired at unix time 1374256800. The current unix time is 1374342424.","type":"OAuthException","code":190,"error_subcode":463}}';
+        var result = JSON.parse(body);
+        if (result.error)
+        {
+            console.log("Error: "+result.error);
+            callback();
+        }
+        else
+        {
+            callback(result.id);
+        }
     });
 }
 
 /* list tasks */
 app.get('/api/tasks', function (req, res) {
     getFacebookId(req.headers['authorization'].substring(7), function (fbid) {
+        if (fbid == null) return res.send({}, 401);
         return taskModel.find({"fbid": fbid}, function (err, tasks) {
             if (!err) {
                 return res.send(tasks);
