@@ -78,6 +78,8 @@ function FacebookSigninController($scope, $location, $rootScope) {
 
     $scope.signIn = function () {
 
+        console.log("Sign in function called.");
+
         FB.getLoginStatus(function (response) {
             console.log(response.status);
             if (response.status === 'connected') {
@@ -142,26 +144,28 @@ function DashboardController($scope, $resource, $rootScope) {
         delete: {method: 'DELETE', params: {}, isArray: false, headers: {Authorization: 'Bearer ' + $rootScope.oauthToken}}
     });
 
-    $scope.tasks = Task.query(function (success) {
-        $scope.cachedTasks = angular.copy($scope.tasks);
+    // Here's the right call...
+    // https://graph.facebook.com/oauth/access_token?client_id=530788920290681&client_secret=028aeeb8614e458a23043a2dfd8bef52&grant_type=fb_exchange_token&fb_exchange_token=CAAHivZB0LbXkBAMMvLJryac8ZAZCYx6CDciBxVX4BqHeLwQKMyZAoImMeYYQb7ZA5lxKfvkrOP4jz0vQNEivZAAucnKn8shEr6E7ULBvWwH99KQBhuboRNbIKDvMs9bBvSd8jgdGNmZC9BzgNSDuwBw4mS9wR6r73tRCsUCsTTaowZDZD
+
+    /*$scope.obtainNewToken = function (callback) {
+     FB.getLoginStatus(function (response) {
+     if (response.status === 'connected') {
+     $rootScope.oauthToken = response.authResponse.accessToken;
+     console.log("obtained new token: "+$rootScope.oauthToken);
+     callback();
+     }
+     });
+     }*/
+
+    $scope.showExpiredModal = function () {
+        $('#expiredModal').modal();
+    }
+
+    $scope.tasks = Task.query(function () {
+        $scope.updateCachedTasks();
     }, function (error) {
-        if (error.status == 401)
-        {
-            // need to re-obtain a token
-            FB.getLoginStatus(function (response) {
-                if (response.status === 'connected') {
-                    $rootScope.oauthToken = response.authResponse.accessToken;
-                    console.log("obtained new token");
-                    $scope.tasks = Task.query(function()
-                    {
-                        $scope.cachedTasks = angular.copy($scope.tasks);
-                    },
-                    function()
-                    {
-                        console.log("have to give up!");
-                    });
-                }
-            });
+        if (error.status == 401) {
+            $scope.showExpiredModal();
         }
     });
 
@@ -173,8 +177,7 @@ function DashboardController($scope, $resource, $rootScope) {
     }
 
     $scope.saveCurrentTask = function () {
-        console.log("updating cached tasks");
-        $scope.cachedTasks = angular.copy($scope.tasks);
+        $scope.updateCachedTasks();
         console.log("will be saving current task now");
         if ($scope.selectedTask._id == null) {
             // new task
@@ -182,6 +185,10 @@ function DashboardController($scope, $resource, $rootScope) {
                 console.log(data);
                 $scope.tasks.push(data);
                 $scope.updateCachedTasks();
+            }, function (error) {
+                if (error.status == 401) {
+                    $scope.showExpiredModal();
+                }
             });
         }
         else {
@@ -189,6 +196,10 @@ function DashboardController($scope, $resource, $rootScope) {
             Task.update({taskId: $scope.selectedTask._id}, $scope.selectedTask, function (data) {
                 console.log("saved");
                 $scope.updateCachedTasks();
+            }, function (error) {
+                if (error.status == 401) {
+                    $scope.showExpiredModal();
+                }
             });
         }
     }
@@ -201,13 +212,6 @@ function DashboardController($scope, $resource, $rootScope) {
     $scope.updateCachedTasks = function () {
         console.log("updating cached tasks");
         $scope.cachedTasks = angular.copy($scope.tasks);
-    }
-
-    $scope.reloadTasks = function () {
-        console.log("reloading tasks");
-        $scope.tasks = Task.query(function () {
-            $scope.cachedTasks = angular.copy($scope.tasks);
-        });
     }
 
     $scope.newTask = function () {
@@ -303,12 +307,28 @@ function DashboardController($scope, $resource, $rootScope) {
             </div>
         </div>
     </div>
+
+    <!-- Confirm delete modal -->
+    <div id="expiredModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-header">
+            <h3>Session Expired</h3>
+        </div>
+        <div class="modal-body">
+            <p>You've been automatically logged out due to inactivity. Click the sign in button to re-sign in to the
+                application.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" data-dismiss="modal" ng-click="signIn()">Sign in</button>
+        </div>
+    </div>
 </div>
 
 
 <div class="container">
     <ng-view></ng-view>
 </div>
+
 
 </body>
 </html>

@@ -34,19 +34,23 @@ app.get('/', function (req, res) {
     res.sendfile('index.html');
 });
 
-var getFacebookId = function (oAuthToken, callback) {
+var getFacebookId = function (oAuthToken, res, callback) {
     console.log("token: "+oAuthToken);
     request("https://graph.facebook.com/me?fields=id&access_token=" + oAuthToken, function (error, response, body) {
 
-        //var result = '{"error":{"message":"Error validating access token: Session has expired at unix time 1374256800. The current unix time is 1374342424.","type":"OAuthException","code":190,"error_subcode":463}}';
         var result = JSON.parse(body);
+
+        //var fakeError = '{"error":{"message":"Error validating access token: Session has expired at unix time 1374256800. The current unix time is 1374342424.","type":"OAuthException","code":190,"error_subcode":463}}';
+        //var result  = JSON.parse(fakeError);
+
         if (result.error)
         {
-            console.log("Error: "+result.error);
-            callback();
+            console.log("Error: "+JSON.stringify(result));
+            res.send({}, 401);
         }
         else
         {
+            console.log("calling back with "+result.id);
             callback(result.id);
         }
     });
@@ -54,8 +58,7 @@ var getFacebookId = function (oAuthToken, callback) {
 
 /* list tasks */
 app.get('/api/tasks', function (req, res) {
-    getFacebookId(req.headers['authorization'].substring(7), function (fbid) {
-        if (fbid == null) return res.send({}, 401);
+    getFacebookId(req.headers['authorization'].substring(7), res, function (fbid) {
         return taskModel.find({"fbid": fbid}, function (err, tasks) {
             if (!err) {
                 return res.send(tasks);
@@ -93,7 +96,7 @@ app.get('/api/tasks/:id', function (req, res) {
 
 /* create */
 app.post('/api/tasks', function (req, res) {
-    getFacebookId(req.headers['authorization'].substring(7), function (fbid) {
+    getFacebookId(req.headers['authorization'].substring(7), res, function (fbid) {
         console.log("POST: ");
         console.log(req.body);
         var task = new taskModel({
@@ -117,7 +120,7 @@ app.post('/api/tasks', function (req, res) {
 
 /* update */
 app.put('/api/tasks/:id', function (req, res) {
-    getFacebookId(req.headers['authorization'].substring(7), function (fbid) {
+    getFacebookId(req.headers['authorization'].substring(7), res, function (fbid) {
         return taskModel.findOne({_id: req.params.id, fbid: fbid}, function (err, task) {
             task.description = req.body.description;
             task.body = req.body.body;
@@ -140,7 +143,7 @@ app.put('/api/tasks/:id', function (req, res) {
 
 /* delete */
 app.delete('/api/tasks/:id', function (req, res) {
-    getFacebookId(req.headers['authorization'].substring(7), function (fbid) {
+    getFacebookId(req.headers['authorization'].substring(7), res, function (fbid) {
         return taskModel.findOne({_id: req.params.id, fbid: fbid}, function (err, task) {
             return task.remove(function (err) {
                 if (!err) {
