@@ -70,7 +70,7 @@ function FacebookSigninController($scope, $location, $rootScope) {
             if (response.status === 'connected') {
                 $scope.setLoginDetails();
             }
-            console.log("OAuth Token: " + $rootScope.oauthToken);
+            console.log("Token: " + $rootScope.oauthToken);
         });
 
     });
@@ -104,12 +104,20 @@ function FacebookSigninController($scope, $location, $rootScope) {
             if (response.status === 'connected') {
 
                 $rootScope.oauthToken = response.authResponse.accessToken;
+                console.log("Now obtaining long lived token...")
 
-                FB.api('/me', function (response) {
-                    $rootScope.name = response.name;
-                    $location.path(DASHBOARD_PATH);
-                    $scope.$apply();
-                });
+                $.ajax("/api/utils/tokenexchange/" + $rootScope.oauthToken)
+                        .done(function (llToken) {
+                            console.log("Long lived token: "+llToken);
+                            $rootScope.oauthToken = llToken;
+
+                            FB.api('/me', function (response) {
+                                $rootScope.name = response.name;
+                                $location.path(DASHBOARD_PATH);
+                                $scope.$apply();
+                            });
+
+                        });
             }
         });
     }
