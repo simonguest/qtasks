@@ -108,7 +108,7 @@ function FacebookSigninController($scope, $location, $rootScope) {
 
                 $.ajax("/api/utils/tokenexchange/" + $rootScope.oauthToken)
                         .done(function (llToken) {
-                            console.log("Long lived token: "+llToken);
+                            console.log("Long lived token: " + llToken);
                             $rootScope.oauthToken = llToken;
 
                             FB.api('/me', function (response) {
@@ -227,8 +227,14 @@ function DashboardController($scope, $resource, $rootScope) {
         $('#taskModal').modal().on('shown', function (data) {
             $(data.target).find("[autofocus]:first").focus();
             // dynamically construct the project and context list
-            $(data.target).find('#inputProject').typeahead().data('typeahead').source = $scope.projects();
-            $(data.target).find('#inputContext').typeahead().data('typeahead').source = $scope.contexts();
+            $(data.target).find('#inputProject').typeahead({data: 'typeahead', source: $scope.projects(), updater: function (item) {
+                $scope.selectedTask.project = item;
+                return item;
+            }});
+            $(data.target).find('#inputContext').typeahead({data: 'typeahead', source: $scope.contexts(), updater: function (item) {
+                $scope.selectedTask.context = item;
+                return item;
+            }});
         });
 
     }
