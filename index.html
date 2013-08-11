@@ -227,13 +227,15 @@ function DashboardController($scope, $resource, $rootScope) {
         $('#taskModal').modal().on('shown', function (data) {
             $(data.target).find("[autofocus]:first").focus();
             // dynamically construct the project and context list
-            $(data.target).find('#inputProject').attr('value',$scope.projectFilter.project);
-            $(data.target).find('#inputProject').typeahead({data: 'typeahead', source: $scope.projects(), updater: function (item) {
+            var inputProject = $(data.target).find('#inputProject');
+            inputProject.attr('value',$scope.projectFilter.project);
+            inputProject.typeahead({data: 'typeahead', source: $scope.projects(), updater: function (item) {
                 $scope.selectedTask.project = item;
                 return item;
             }});
-            $(data.target).find('#inputContext').attr('value',$scope.contextFilter.context);
-            $(data.target).find('#inputContext').typeahead({data: 'typeahead', source: $scope.contexts(), updater: function (item) {
+            var inputContext = $(data.target).find('#inputContext');
+            inputContext.attr('value',$scope.contextFilter.context);
+            inputContext.typeahead({data: 'typeahead', source: $scope.contexts(), updater: function (item) {
                 $scope.selectedTask.context = item;
                 return item;
             }});
