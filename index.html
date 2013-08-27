@@ -47,6 +47,7 @@ var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routePr
 
 });
 
+
 function FacebookSigninController($scope, $location, $rootScope) {
 
     $scope.$on('$viewContentLoaded', function () {
@@ -151,6 +152,23 @@ function DashboardController($scope, $resource, $rootScope) {
         delete: {method: 'DELETE', params: {}, isArray: false, headers: {Authorization: 'Bearer ' + $rootScope.oauthToken}}
     });
 
+    $scope.$on('$viewContentLoaded', function () {
+        console.log("view content is ready!");
+
+        $('#taskModal').on('shown', function (data) {
+            $(data.target).find("[autofocus]:first").focus();
+            // dynamically construct the project and context list
+            $(data.target).find('#inputProject').typeahead({data: 'typeahead', source: $scope.projects(), updater: function (item) {
+                $scope.selectedTask.project = item;
+                return item;
+            }});
+            $(data.target).find('#inputContext').typeahead({data: 'typeahead', source: $scope.contexts(), updater: function (item) {
+                $scope.selectedTask.context = item;
+                return item;
+            }});
+        });
+    });
+
     // Here's the right call...
     // https://graph.facebook.com/oauth/access_token?client_id=530788920290681&client_secret=028aeeb8614e458a23043a2dfd8bef52&grant_type=fb_exchange_token&fb_exchange_token=CAAHivZB0LbXkBAMMvLJryac8ZAZCYx6CDciBxVX4BqHeLwQKMyZAoImMeYYQb7ZA5lxKfvkrOP4jz0vQNEivZAAucnKn8shEr6E7ULBvWwH99KQBhuboRNbIKDvMs9bBvSd8jgdGNmZC9BzgNSDuwBw4mS9wR6r73tRCsUCsTTaowZDZD
 
@@ -224,21 +242,9 @@ function DashboardController($scope, $resource, $rootScope) {
     $scope.newTask = function () {
         $scope.selectedTask = new Task();
         $scope.selectedTask.thisweek = false;  // default values
-        $('#taskModal').modal().on('shown', function (data) {
-            $(data.target).find("[autofocus]:first").focus();
-            // dynamically construct the project and context list
-            $scope.selectedTask.project = $scope.projectFilter.project;
-            $(data.target).find('#inputProject').typeahead({data: 'typeahead', source: $scope.projects(), updater: function (item) {
-                $scope.selectedTask.project = item;
-                return item;
-            }});
-            $scope.selectedTask.context = $scope.contextFilter.context;
-            $(data.target).find('#inputContext').typeahead({data: 'typeahead', source: $scope.contexts(), updater: function (item) {
-                $scope.selectedTask.context = item;
-                return item;
-            }});
-        });
-
+        $scope.selectedTask.project = $scope.projectFilter.project;
+        $scope.selectedTask.context = $scope.contextFilter.context;
+        $('#taskModal').modal('show');
     }
 
     $scope.showCompleteDialog = function (id) {
