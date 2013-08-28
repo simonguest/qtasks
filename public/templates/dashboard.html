@@ -34,7 +34,6 @@
                 <thead>
                 <tr>
                     <th>Description</th>
-                    <th>Body</th>
                     <th>Project</th>
                     <th>Context</th>
                     <th>@tw?</th>
@@ -44,9 +43,6 @@
                 <tr ng-repeat="task in tasks | orderBy:'description':false | filter:projectFilter | filter:contextFilter | filter:thisweekFilter | filter:searchText">
                     <td ng-click="selectTask(task._id)">
                         {{task.description}}
-                    </td>
-                    <td ng-click="selectTask(task._id)">
-                        {{task.body}}
                     </td>
                     <td ng-click="selectTask(task._id)">
                         {{task.project}}
