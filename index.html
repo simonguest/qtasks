@@ -288,9 +288,9 @@ function DashboardController($scope, $resource, $rootScope) {
     $scope.thisweeks = function () {
         return uniqueValues('thisweek');
     }
-    $scope.thisweekFilter = {};
-    $scope.setThisweekFilter = function (passedThisweek) {
-        $scope.thisweekFilter = {thisweek: passedThisweek};
+    $scope.thisweekFilter = {thisweek: false};
+    $scope.toggleThisweekFilter = function () {
+        $scope.thisweekFilter.thisweek = !($scope.thisweekFilter.thisweek);
     }
 }
 
