@@ -167,6 +167,17 @@ function DashboardController($scope, $resource, $rootScope) {
                 return item;
             }});
         });
+
+        function keyPressed(e){
+            switch(e.keyCode)
+            {
+                case 78:$('#new-task-button').click();
+                    break;
+                default : break;
+            }
+
+        }
+        document.addEventListener('keyup',keyPressed, false);
     });
 
     // Here's the right call...
