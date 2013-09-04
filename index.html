@@ -168,18 +168,25 @@ function DashboardController($scope, $resource, $rootScope) {
             }});
         });
 
-        function keyPressed(e){
-            switch(e.keyCode)
-            {
-                case 78:$('#new-task-button').click();
-                    break;
-                case 84:$('#this-week-button').click();
-                    break;
-                default : break;
+        function keyPressed(e) {
+            // ignore keypresses if the new task modal is shown
+            if ($('#taskModal').data('modal')) {
+                if ($('#taskModal').data('modal').isShown) return;
             }
 
+            switch (e.keyCode) {
+                case 78:
+                    $('#new-task-button').click();
+                    break;
+                case 84:
+                    $('#this-week-button').click();
+                    break;
+                default :
+                    break;
+            }
         }
-        document.addEventListener('keyup',keyPressed, false);
+
+        document.addEventListener('keyup', keyPressed, false);
     });
 
     // Here's the right call...
