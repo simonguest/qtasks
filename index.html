@@ -36,21 +36,29 @@ var taskModule = angular.module('taskServices', ['ngResource'])
                     }
                 }
             })
-        }).filter('exactString', function() {
-            return function(string, term) {
-                console.log("exact filter being called");
-                return ('' + string).indexOf(term) > -1;
-            }
         });
 
-var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
+var qTasksApp = angular.module('qTasksApp', ['taskServices'],function ($routeProvider) {
     $routeProvider
             .when(SIGNIN_PATH, {templateUrl: SIGNIN_TEMPLATE, controller: FacebookSigninController})
             .when(DASHBOARD_PATH, {templateUrl: DASHBOARD_TEMPLATE, controller: DashboardController})
             .when(SETTINGS_PATH, {templateUrl: SETTINGS_TEMPLATE, controller: SettingsController})
             .otherwise({redirectTo: SIGNIN_PATH});
 
-});
+}).filter('exactProjectFilter', function () {
+            return function (tasks, desiredProject) {
+                if (desiredProject == "") return tasks; // all tasks requested
+                var matched = [];
+                angular.forEach(tasks, function(task)
+                {
+                    if (task.project == desiredProject)
+                    {
+                        matched.push(task);
+                    }
+                });
+                return matched;
+            }
+        });
 
 
 function FacebookSigninController($scope, $location, $rootScope) {
@@ -194,6 +202,8 @@ function DashboardController($scope, $resource, $rootScope) {
         }
 
         document.addEventListener('keyup', keyPressed, false);
+
+        $scope.setProjectFilter("");
     });
 
     // Here's the right call...
@@ -288,7 +298,7 @@ function DashboardController($scope, $resource, $rootScope) {
         });
     }
 
-    $scope.clearSearch = function() {
+    $scope.clearSearch = function () {
         $scope.searchText = "";
     }
 
@@ -303,7 +313,7 @@ function DashboardController($scope, $resource, $rootScope) {
     }
     $scope.projectFilter = {};
     $scope.setProjectFilter = function (passedProject) {
-        $scope.projectFilter = {project: passedProject};
+        $scope.projectFilter = passedProject;
     }
 
     // Scope for contexts

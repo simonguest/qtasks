@@ -30,7 +30,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="task in tasks | orderBy:'description':false | filter:projectFilter | filter:contextFilter | filter:thisweekFilter | filter:searchText">
+                <tr ng-repeat="task in tasks | orderBy:'description':false | exactProjectFilter:projectFilter | filter:contextFilter | filter:thisweekFilter | filter:searchText">
                     <td ng-click="selectTask(task._id)">
                         {{task.description}}
                     </td>
