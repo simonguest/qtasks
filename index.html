@@ -36,6 +36,11 @@ var taskModule = angular.module('taskServices', ['ngResource'])
                     }
                 }
             })
+        }).filter('exactString', function() {
+            return function(string, term) {
+                console.log("exact filter being called");
+                return ('' + string).indexOf(term) > -1;
+            }
         });
 
 var qTasksApp = angular.module('qTasksApp', ['taskServices'], function ($routeProvider) {
@@ -281,6 +286,10 @@ function DashboardController($scope, $resource, $rootScope) {
         Task.delete({taskId: id}, function () {
             $scope.tasks = _.without($scope.tasks, $scope.tbdTask);
         });
+    }
+
+    $scope.clearSearch = function() {
+        $scope.searchText = "";
     }
 
 

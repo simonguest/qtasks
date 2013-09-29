@@ -11,7 +11,10 @@
         <div id="header">
             <div class="row">
                 <div class="span8">
-                    <input type="text" placeholder="Search Tasks" ng-model="searchText">
+                    <div class="input-append">
+                        <input type="search" placeholder="Search Tasks" ng-model="searchText">
+                        <button type="submit" class="btn" ng-click="clearSearch()">Clear</button>
+                    </div>
                 </div>
                 <div class="span2 text-right">
                     <button id="new-task-button" class="btn btn-primary" ng-click="newTask()">Create New Task</button>
